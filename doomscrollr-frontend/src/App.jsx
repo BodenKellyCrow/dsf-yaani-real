@@ -7,6 +7,8 @@ import Register from './pages/Register';
 import api from './api/axios';
 import HomePage from './pages/HomePage'; 
 import Profile from './pages/AccountPage';
+import ChatList from './pages/ChatList';
+import ChatRoom from './pages/ChatRoom';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -34,6 +36,8 @@ function App() {
         <Route path="*" element={<div className="p-6 text-center">404 - Page Not Found</div>} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/home" element={loggedIn ? <HomePage /> : <Navigate to="/login" />}/>
+        <Route path="/chat" element={<ChatList />} />
+        <Route path="/chat/:id" element={<ChatRoom />} />
       </Routes>
     </Router>
   );
