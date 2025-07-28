@@ -48,40 +48,47 @@ const ChatRoom = () => {
   }, [id]);
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Chat Room</h2>
+    <div className="max-w-3xl mx-auto p-6">
+      <h2 className="text-2xl font-bold mb-6 text-center">Chat Room</h2>
 
       {loading ? (
-        <p>Loading messages...</p>
+        <p className="text-center text-gray-600">Loading messages...</p>
       ) : (
-        <div className="space-y-2 mb-4 max-h-[400px] overflow-y-auto">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`p-3 rounded ${
-                msg.sender_username === localStorage.getItem('username')
-                  ? 'bg-blue-100 text-right'
-                  : 'bg-gray-100 text-left'
-              }`}
-            >
-              <p className="text-sm">{msg.sender_username}</p>
-              <p className="text-base">{msg.text}</p>
-              <p className="text-xs text-gray-500">{new Date(msg.timestamp).toLocaleTimeString()}</p>
-            </div>
-          ))}
+        <div className="space-y-3 mb-6 max-h-[400px] overflow-y-auto bg-white p-4 rounded-lg shadow-inner">
+          {messages.map((msg) => {
+            const isMe = msg.sender_username === localStorage.getItem('username');
+            return (
+              <div
+                key={msg.id}
+                className={`max-w-[75%] p-3 rounded-lg shadow-sm ${
+                  isMe
+                    ? 'ml-auto bg-blue-100 text-right'
+                    : 'mr-auto bg-gray-100 text-left'
+                }`}
+              >
+                <p className="text-sm text-gray-600 font-medium">
+                  {msg.sender_username}
+                </p>
+                <p className="text-base">{msg.text}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(msg.timestamp).toLocaleTimeString()}
+                </p>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex gap-3 items-center">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type a message..."
-          className="flex-grow p-2 border rounded"
+          className="flex-grow border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring focus:border-blue-400"
         />
         <button
           onClick={sendMessage}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
         >
           Send
         </button>

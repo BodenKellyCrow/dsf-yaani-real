@@ -23,24 +23,35 @@ const ChatList = () => {
   }, []);
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">My Chats</h2>
-      <ul className="space-y-4">
-        {conversations.map((conv) => {
-          const otherUser =
-            conv.user1 === parseInt(localStorage.getItem('user_id'))
-              ? conv.user2_username
-              : conv.user1_username;
+    <div className="max-w-3xl mx-auto p-6">
+      <h2 className="text-3xl font-bold mb-6 text-center">Your Chats</h2>
 
-          return (
-            <li key={conv.id} className="p-4 bg-white shadow rounded">
-              <Link to={`/chat/${conv.id}`} className="text-blue-600 font-semibold">
-                Chat with @{otherUser}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      {conversations.length === 0 ? (
+        <p className="text-center text-gray-600">No conversations yet.</p>
+      ) : (
+        <ul className="space-y-4">
+          {conversations.map((conv) => {
+            const otherUser =
+              conv.user1 === parseInt(localStorage.getItem('user_id'))
+                ? conv.user2_username
+                : conv.user1_username;
+
+            return (
+              <li
+                key={conv.id}
+                className="bg-white rounded-xl shadow-md px-5 py-4 hover:shadow-lg transition"
+              >
+                <Link
+                  to={`/chat/${conv.id}`}
+                  className="text-blue-600 font-semibold text-lg hover:underline"
+                >
+                  Chat with @{otherUser}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };

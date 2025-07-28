@@ -48,72 +48,92 @@ export default function UnifiedPostForm() {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-8 p-4 bg-white shadow rounded">
-      <h2 className="text-xl font-semibold mb-4">Create New Post</h2>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow font-sans mt-10">
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">Create a New {postType === 'project' ? 'Project' : 'Post'}</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
 
         {/* Post Type Selector */}
         <div>
-          <label className="block mb-1 font-medium">Post Type</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Post Type</label>
           <select
             value={postType}
             onChange={(e) => setPostType(e.target.value)}
-            className="w-full border p-2 rounded"
+            className="w-full border px-3 py-2 rounded text-sm"
           >
             <option value="social">Social Post</option>
             <option value="project">Project Post</option>
           </select>
         </div>
 
-        {/* Conditional Fields */}
+        {/* Conditional Fields for Project */}
         {postType === 'project' && (
           <>
-            <input
-              type="text"
-              placeholder="Project Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Target Amount"
-              value={targetAmount}
-              onChange={(e) => setTargetAmount(e.target.value)}
-              className="w-full p-2 border rounded"
-              required
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full border px-3 py-2 rounded text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Target Amount</label>
+              <input
+                type="number"
+                value={targetAmount}
+                onChange={(e) => setTargetAmount(e.target.value)}
+                className="w-full border px-3 py-2 rounded text-sm"
+                required
+              />
+            </div>
           </>
         )}
 
-        {/* Shared Description/Content Field */}
-        <textarea
-          placeholder={postType === 'project' ? 'Project Description' : 'What’s on your mind?'}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
+        {/* Description Field (shared) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {postType === 'project' ? 'Project Description' : 'Post Content'}
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Write something..."
+            className="w-full border px-3 py-2 rounded text-sm"
+            rows={4}
+            required
+          />
+        </div>
 
         {/* Image Upload */}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="block"
-        />
-        {preview && (
-          <img src={preview} alt="Preview" className="w-full max-h-64 object-cover rounded" />
-        )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image (optional)</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="block text-sm"
+          />
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-full max-h-64 object-cover rounded-lg mt-3"
+            />
+          )}
+        </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          {postType === 'project' ? 'Create Project' : 'Post'}
-        </button>
+        {/* Submit Button */}
+        <div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white font-medium py-2 rounded hover:bg-blue-700 transition duration-200"
+          >
+            {postType === 'project' ? 'Create Project' : 'Post'}
+          </button>
+        </div>
       </form>
     </div>
   );
