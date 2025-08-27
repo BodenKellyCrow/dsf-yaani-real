@@ -1,78 +1,64 @@
-// src/pages/LoginPage.jsx
-import { useState } from 'react';
-import api from '../api/axios';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from "react";
+import api from "../api/axios";
 
-const LoginPage = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+const Login = ({ onLogin }) => {
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     try {
-      // ✅ dj-rest-auth expects "username", not "email"
-      await api.post('auth/login/', { username: email, password });
-      onLogin();
-      navigate('/explore');
+      // ✅ login with username OR email
+      const res = await api.post("auth/login/", {
+        username: usernameOrEmail,
+        password: password,
+      });
+
+      // after login, fetch user
+      const userRes = await api.get("auth/user/");
+      onLogin(userRes.data);
+
     } catch (err) {
-      setError('Invalid email or password');
+      console.error(err);
+      setError("Login failed. Please check your credentials.");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-red-200">
-        {/* 🔴 Header */}
-        <h1 className="text-3xl font-bold mb-2 text-center text-red-600">
-          Welcome to Doomscrollr 🚀
-        </h1>
-        <p className="text-center text-gray-600 mb-6">
-          Log in to explore and support your favorite projects.
-        </p>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-2xl p-8 w-96">
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Login</h2>
 
-        {error && (
-          <div className="text-red-500 mb-3 text-sm text-center font-medium">
-            {error}
-          </div>
-        )}
+        <input
+          type="text"
+          placeholder="Username or Email"
+          value={usernameOrEmail}
+          onChange={(e) => setUsernameOrEmail(e.target.value)}
+          className="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring focus:ring-indigo-200"
+        />
 
-        {/* 🔐 Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-          <button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 text-white p-3 rounded-xl font-semibold shadow-md transition"
-          >
-            Log In
-          </button>
-        </form>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring focus:ring-indigo-200"
+        />
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don’t have an account?{' '}
-          <Link to="/register" className="text-red-600 hover:underline font-medium">
-            Register here
-          </Link>
-        </p>
-      </div>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+        <button
+          type="submit"
+          className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
+        >
+          Login
+        </button>
+      </form>
     </div>
   );
 };
 
-export default LoginPage;
+export default Login;
