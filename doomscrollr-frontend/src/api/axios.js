@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://doomscrollr-backend.onrender.com/api/', // ✅ backend base URL
+  baseURL: 'https://https://doomscrollr.onrender.com/api/', // ✅ backend base URL
   withCredentials: true, // ✅ must be capital C
 });
 
