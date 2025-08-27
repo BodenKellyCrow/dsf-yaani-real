@@ -1,64 +1,94 @@
-import React, { useState } from "react";
-import api from "../api/axios";
+// src/pages/LoginPage.jsx
+import { useState } from 'react';
+import api from '../api/axios';
+import { useNavigate, Link } from 'react-router-dom';
 
-const Login = ({ onLogin }) => {
-  const [usernameOrEmail, setUsernameOrEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+const LoginPage = ({ onLogin }) => {
+  const [identifier, setIdentifier] = useState(''); // username OR email
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setError("");
+    setError('');
+
+    // Send the correct key based on what the user typed
+    const payload =
+      identifier.includes('@')
+        ? { email: identifier, password }
+        : { username: identifier, password };
 
     try {
-      // ✅ login with username OR email
-      const res = await api.post("auth/login/", {
-        username: usernameOrEmail,
-        password: password,
-      });
-
-      // after login, fetch user
-      const userRes = await api.get("auth/user/");
-      onLogin(userRes.data);
-
+      await api.post('auth/login/', payload);
+      onLogin();
+      navigate('/explore');
     } catch (err) {
-      console.error(err);
-      setError("Login failed. Please check your credentials.");
+      const data = err?.response?.data;
+      const msg =
+        typeof data === 'string'
+          ? data
+          : data?.detail ||
+            Object.values(data || {})
+              .flat()
+              .join(' ') ||
+            'Invalid login. Please check your credentials.';
+      setError(msg);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-2xl p-8 w-96">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Login</h2>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6">
+      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-red-200">
+        {/* 🔴 Header */}
+        <h1 className="text-3xl font-bold mb-2 text-center text-red-600">
+          Welcome to Doomscrollr 🚀
+        </h1>
+        <p className="text-center text-gray-600 mb-6">
+          Log in to explore and support your favorite projects.
+        </p>
 
-        <input
-          type="text"
-          placeholder="Username or Email"
-          value={usernameOrEmail}
-          onChange={(e) => setUsernameOrEmail(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring focus:ring-indigo-200"
-        />
+        {error && (
+          <div className="text-red-600 bg-red-50 border border-red-200 mb-4 p-3 rounded-lg text-sm text-center">
+            {error}
+          </div>
+        )}
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg mb-4 focus:outline-none focus:ring focus:ring-indigo-200"
-        />
+        {/* 🔐 Login Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Username or Email"
+            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+            value={identifier}
+            onChange={e => setIdentifier(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            className="w-full bg-red-600 hover:bg-red-700 text-white p-3 rounded-xl font-semibold shadow-md transition"
+          >
+            Log In
+          </button>
+        </form>
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
-        >
-          Login
-        </button>
-      </form>
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Don’t have an account?{' '}
+          <Link to="/register" className="text-red-600 hover:underline font-medium">
+            Register here
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
 
-export default Login;
+export default LoginPage;
