@@ -1,3 +1,4 @@
+// src/pages/Register.jsx
 import { useState } from 'react';
 import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
@@ -12,24 +13,33 @@ const Register = ({ onLogin }) => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setError('');
+
     if (password1 !== password2) {
       setError("Passwords don't match");
       return;
     }
 
     try {
+      // 1️⃣ Register new user
       await api.post('auth/registration/', {
-        email,
         username,
+        email,
         password1,
         password2,
       });
-      await api.post('auth/login/', { email, password: password1 });
+
+      // 2️⃣ Log them in immediately (if you want auto-login)
+      await api.post('auth/login/', {
+        username, // dj-rest-auth default
+        password: password1,
+      });
+
       onLogin();
-      navigate('/explore'); // or /home if preferred
+      navigate('/explore');
     } catch (err) {
-      console.error(err);
-      setError('Signup failed. Try a different email.');
+      console.error(err.response?.data || err.message);
+      setError('Signup failed. Please try a different username/email.');
     }
   };
 
@@ -37,9 +47,13 @@ const Register = ({ onLogin }) => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
       <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow">
         <h1 className="text-3xl font-bold mb-2 text-center">Create Your Account</h1>
-        <p className="text-center text-gray-600 mb-6">Join Doomscrollr and back amazing projects.</p>
+        <p className="text-center text-gray-600 mb-6">
+          Join Doomscrollr and back amazing projects.
+        </p>
 
-        {error && <div className="text-red-500 text-sm text-center mb-4">{error}</div>}
+        {error && (
+          <div className="text-red-500 text-sm text-center mb-4">{error}</div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -74,7 +88,10 @@ const Register = ({ onLogin }) => {
             onChange={e => setPassword2(e.target.value)}
             required
           />
-          <button type="submit" className="w-full bg-black text-white p-3 rounded-xl">
+          <button
+            type="submit"
+            className="w-full bg-black text-white p-3 rounded-xl"
+          >
             Register
           </button>
         </form>

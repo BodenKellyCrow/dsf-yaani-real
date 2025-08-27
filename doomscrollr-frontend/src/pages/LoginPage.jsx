@@ -12,7 +12,8 @@ const LoginPage = ({ onLogin }) => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      await api.post('auth/login/', { email, password });
+      // ✅ dj-rest-auth expects "username", not "email"
+      await api.post('auth/login/', { username: email, password });
       onLogin();
       navigate('/explore');
     } catch (err) {
@@ -21,22 +22,28 @@ const LoginPage = ({ onLogin }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow">
-        {/* 🎉 Welcome Header */}
-        <h1 className="text-3xl font-bold mb-2 text-center">Welcome to Doomscrollr 🚀</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6">
+      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-red-200">
+        {/* 🔴 Header */}
+        <h1 className="text-3xl font-bold mb-2 text-center text-red-600">
+          Welcome to Doomscrollr 🚀
+        </h1>
         <p className="text-center text-gray-600 mb-6">
           Log in to explore and support your favorite projects.
         </p>
 
-        {error && <div className="text-red-500 mb-3 text-sm text-center">{error}</div>}
+        {error && (
+          <div className="text-red-500 mb-3 text-sm text-center font-medium">
+            {error}
+          </div>
+        )}
 
         {/* 🔐 Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
             placeholder="Email"
-            className="w-full p-3 border rounded"
+            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -44,19 +51,24 @@ const LoginPage = ({ onLogin }) => {
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-3 border rounded"
+            className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
           />
-          <button type="submit" className="w-full bg-black text-white p-3 rounded-xl">
+          <button
+            type="submit"
+            className="w-full bg-red-600 hover:bg-red-700 text-white p-3 rounded-xl font-semibold shadow-md transition"
+          >
             Log In
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-500">
+        <p className="mt-4 text-center text-sm text-gray-600">
           Don’t have an account?{' '}
-          <Link to="/register" className="text-blue-600">Register here</Link>
+          <Link to="/register" className="text-red-600 hover:underline font-medium">
+            Register here
+          </Link>
         </p>
       </div>
     </div>
