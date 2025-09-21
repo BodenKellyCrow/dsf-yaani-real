@@ -11,6 +11,7 @@ import ChatRoom from './pages/ChatRoom';
 import CreateProjectPage from './pages/CreateProjectPage';
 import ProjectDetails from './pages/ProjectDetails';
 import api from './api/axios';
+import Layout from './components/Layout';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -28,20 +29,27 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Redirect root */}
         <Route path="/" element={<Navigate to={loggedIn ? "/home" : "/login"} />} />
+
+        {/* Auth routes */}
         <Route path="/login" element={<Login onLogin={() => setLoggedIn(true)} />} />
         <Route path="/register" element={<Register onLogin={() => setLoggedIn(true)} />} />
-        
-        {/* Protected Routes */}
-        <Route path="/home" element={loggedIn ? <HomePage /> : <Navigate to="/login" />} />
-        <Route path="/explore" element={loggedIn ? <Explore /> : <Navigate to="/login" />} />
-        <Route path="/profile" element={loggedIn ? <Profile /> : <Navigate to="/login" />} />
-        <Route path="/create" element={loggedIn ? <CreateProjectPage /> : <Navigate to="/login" />} />
-        <Route path="/project/:id" element={loggedIn ? <ProjectDetails /> : <Navigate to="/login" />} />
-        <Route path="/chat" element={loggedIn ? <ChatList /> : <Navigate to="/login" />} />
-        <Route path="/chat/:id" element={loggedIn ? <ChatRoom /> : <Navigate to="/login" />} />
-        
-        {/* Fallback */}
+
+        {/* Protected routes inside Layout */}
+        {loggedIn && (
+          <Route element={<Layout />}>
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/create" element={<CreateProjectPage />} />
+            <Route path="/project/:id" element={<ProjectDetails />} />
+            <Route path="/chat" element={<ChatList />} />
+            <Route path="/chat/:id" element={<ChatRoom />} />
+          </Route>
+        )}
+
+        {/* Catch-all */}
         <Route path="*" element={<div className="p-6 text-center">404 - Page Not Found</div>} />
       </Routes>
     </Router>
