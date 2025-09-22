@@ -27,7 +27,7 @@ export default function UnifiedPostForm() {
       formData.append('description', description);
       formData.append('target_amount', targetAmount);
     } else {
-      formData.append('content', description); // re-use description as content
+      formData.append('content', description);
     }
 
     if (image) {
@@ -36,12 +36,31 @@ export default function UnifiedPostForm() {
 
     try {
       const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
+
+      // ✅ Get JWT token from localStorage (or wherever you store it)
+      const token = localStorage.getItem('accessToken'); // adjust key if different
+      if (!token) {
+        alert('You must be logged in to post.');
+        return;
+      }
+
       const response = await axios.post(endpoint, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`, // attach JWT
+        },
       });
 
       console.log('Post submitted successfully:', response.data);
-      navigate('/feed'); // navigate only on success
+
+      // reset form
+      setTitle('');
+      setDescription('');
+      setTargetAmount('');
+      setImage(null);
+      setPreview(null);
+
+      navigate('/feed'); // navigate after success
     } catch (err) {
       if (err.response) {
         console.error('Backend error response:', err.response.data);
@@ -103,7 +122,7 @@ export default function UnifiedPostForm() {
           </>
         )}
 
-        {/* Description Field (shared) */}
+        {/* Description Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {postType === 'project' ? 'Project Description' : 'Post Content'}
