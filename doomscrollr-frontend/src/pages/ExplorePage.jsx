@@ -1,16 +1,21 @@
+// src/pages/ExplorePage.jsx
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { MEDIA_URL } from '../api/config';
+import { useNavigate } from 'react-router-dom';
 
 const Explore = () => {
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
+        // ✅ token is automatically attached by axios interceptor
         const [projectRes, userRes] = await Promise.all([
           api.get('projects/'),
           api.get('users/')
@@ -19,13 +24,18 @@ const Explore = () => {
         setUsers(userRes.data);
       } catch (err) {
         console.error('Failed to fetch data:', err);
+
+        // Redirect to login only if unauthorized
+        if (err.response?.status === 401) {
+          navigate('/login');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const filteredProjects = projects.filter(project =>
     project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
