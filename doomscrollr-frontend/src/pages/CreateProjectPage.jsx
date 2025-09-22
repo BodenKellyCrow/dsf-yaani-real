@@ -4,6 +4,7 @@ import api from '../api/axios'; // axios instance with JWT auto-refresh
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateProjectPage() {
+  const [postType, setPostType] = useState('social'); // 'social' or 'project'
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -29,17 +30,24 @@ export default function CreateProjectPage() {
     }
 
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('target_amount', targetAmount);
+
+    if (postType === 'project') {
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('target_amount', targetAmount);
+    } else {
+      formData.append('content', description); // social post
+    }
+
     if (image) formData.append('image', image);
 
     try {
-      const response = await api.post('/projects/', formData, {
+      const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
+      const response = await api.post(endpoint, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      console.log('Project created successfully:', response.data);
+      console.log('Post submitted successfully:', response.data);
 
       // Reset form
       setTitle('');
@@ -47,6 +55,7 @@ export default function CreateProjectPage() {
       setTargetAmount('');
       setImage(null);
       setPreview(null);
+      setPostType('social'); // reset type
 
       navigate('/feed'); // redirect after success
     } catch (err) {
@@ -58,44 +67,63 @@ export default function CreateProjectPage() {
             : err.response.data
         );
       } else {
-        console.error('Error submitting project:', err.message);
-        alert(`Error submitting project: ${err.message}`);
+        console.error('Error submitting post:', err.message);
+        alert(`Error submitting post: ${err.message}`);
       }
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow font-sans mt-10">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">Create a New Project</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">
+        Create a New {postType === 'project' ? 'Project' : 'Social Post'}
+      </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Project Title */}
+        {/* Post Type Selector */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+          <label className="block text-sm font-medium text-gray-700 mb-1">Post Type</label>
+          <select
+            value={postType}
+            onChange={(e) => setPostType(e.target.value)}
             className="w-full border px-3 py-2 rounded text-sm"
-            required
-          />
+          >
+            <option value="social">Social Post</option>
+            <option value="project">Project Post</option>
+          </select>
         </div>
 
-        {/* Target Amount */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Target Amount</label>
-          <input
-            type="number"
-            value={targetAmount}
-            onChange={(e) => setTargetAmount(e.target.value)}
-            className="w-full border px-3 py-2 rounded text-sm"
-            required
-          />
-        </div>
+        {/* Project-specific fields */}
+        {postType === 'project' && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full border px-3 py-2 rounded text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Target Amount</label>
+              <input
+                type="number"
+                value={targetAmount}
+                onChange={(e) => setTargetAmount(e.target.value)}
+                className="w-full border px-3 py-2 rounded text-sm"
+                required
+              />
+            </div>
+          </>
+        )}
 
-        {/* Project Description */}
+        {/* Description / Content Field */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Project Description</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {postType === 'project' ? 'Project Description' : 'Post Content'}
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -130,7 +158,7 @@ export default function CreateProjectPage() {
             type="submit"
             className="w-full bg-blue-600 text-white font-medium py-2 rounded hover:bg-blue-700 transition duration-200"
           >
-            Create Project
+            {postType === 'project' ? 'Create Project' : 'Post'}
           </button>
         </div>
       </form>
