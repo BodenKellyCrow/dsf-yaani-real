@@ -2,6 +2,11 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'https://doomscrollr.onrender.com/api/',
+  withCredentials: true,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
 });
 
 let isRefreshing = false;
@@ -15,15 +20,17 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(config => {
   const token = localStorage.getItem('accessToken');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -51,13 +58,17 @@ api.interceptors.response.use(
 
       try {
         const res = await axios.post(
-          'https://doomscrollr.onrender.com/api/token/refresh/', // ✅ Correct endpoint
-          { refresh: refreshToken }
+          'https://doomscrollr.onrender.com/api/token/refresh/',
+          { refresh: refreshToken },
+          { headers: { Accept: 'application/json' } } // ✅ Always ask for JSON
         );
+
         localStorage.setItem('accessToken', res.data.access);
         api.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.access;
+
         processQueue(null, res.data.access);
         isRefreshing = false;
+
         originalRequest.headers.Authorization = 'Bearer ' + res.data.access;
         return api(originalRequest);
       } catch (err) {

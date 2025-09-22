@@ -9,7 +9,6 @@ export default function CreateProjectPage() {
   const [targetAmount, setTargetAmount] = useState('');
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [uploaded, setUploaded] = useState(false);
 
   const navigate = useNavigate();
 
@@ -17,27 +16,6 @@ export default function CreateProjectPage() {
     const file = e.target.files[0];
     setImage(file);
     setPreview(URL.createObjectURL(file));
-    setUploaded(false);
-  };
-
-  const handleUploadImage = async () => {
-    if (!image) return alert('Please select an image first!');
-    try {
-      const formData = new FormData();
-      formData.append('image', image);
-
-      // temporary upload endpoint if you want separate image upload 
-      // otherwise just keep image for form submit
-      await api.post('/upload-temp/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      setUploaded(true);
-      alert('Image uploaded successfully!');
-    } catch (err) {
-      console.error('Image upload failed:', err);
-      alert('Failed to upload image.');
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -57,13 +35,19 @@ export default function CreateProjectPage() {
     try {
       const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
       await api.post(endpoint, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json', // ✅ ensures JSON response
+        },
       });
       navigate('/feed');
     } catch (err) {
       if (err.response) {
         console.error('Error response:', err.response.data);
-        alert(JSON.stringify(err.response.data));
+        alert(
+          JSON.stringify(err.response.data, null, 2) ||
+            'Error submitting post. Please try again.'
+        );
       } else {
         console.error('Error submitting post:', err.message);
       }
@@ -78,7 +62,9 @@ export default function CreateProjectPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Post Type</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Post Type
+          </label>
           <select
             value={postType}
             onChange={(e) => setPostType(e.target.value)}
@@ -92,7 +78,9 @@ export default function CreateProjectPage() {
         {postType === 'project' && (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Project Title
+              </label>
               <input
                 type="text"
                 value={title}
@@ -102,7 +90,9 @@ export default function CreateProjectPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Target Amount</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Target Amount
+              </label>
               <input
                 type="number"
                 value={targetAmount}
@@ -129,29 +119,23 @@ export default function CreateProjectPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image (optional)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Upload Image (optional)
+          </label>
           <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            className="block text-sm"
+            className="block text-sm mb-2"
           />
           {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-full max-h-64 object-cover rounded-lg mt-3"
-            />
-          )}
-
-          {image && (
-            <button
-              type="button"
-              onClick={handleUploadImage}
-              className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-            >
-              {uploaded ? 'Re-upload Image' : 'Upload Image'}
-            </button>
+            <div className="relative">
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-full max-h-64 object-cover rounded-lg mt-3 border"
+              />
+            </div>
           )}
         </div>
 

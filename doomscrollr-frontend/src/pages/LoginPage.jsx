@@ -14,21 +14,21 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
-      // ✅ Attempt login
-      const res = await api.post('auth/login/', {
-        username,
-        password,
-      });
+      const res = await api.post(
+        '/auth/login/',
+        { username, password },
+        {
+          headers: {
+            Accept: 'application/json', // ✅ Force JSON
+          },
+        }
+      );
 
-      // ✅ Store tokens
       const { access, refresh } = res.data;
       localStorage.setItem('accessToken', access);
       localStorage.setItem('refreshToken', refresh);
 
-      // ✅ Trigger app-level login state
       if (onLogin) onLogin();
-
-      // ✅ Redirect
       navigate('/explore');
     } catch (err) {
       const data = err?.response?.data;

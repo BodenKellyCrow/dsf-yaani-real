@@ -18,7 +18,9 @@ function AccountPage() {
 
   const fetchFundingHistory = async () => {
     try {
-      const res = await api.get('/user-transactions/');
+      const res = await api.get('/user-transactions/', {
+        headers: { Accept: 'application/json' }, // ✅ force JSON
+      });
       setTransactions(res.data);
     } catch (err) {
       console.error('Failed to fetch funding history:', err);
@@ -27,7 +29,9 @@ function AccountPage() {
 
   const fetchUser = async () => {
     try {
-      const res = await api.get('/auth/user/');
+      const res = await api.get('/auth/user/', {
+        headers: { Accept: 'application/json' }, // ✅ force JSON
+      });
       setUser(res.data);
     } catch (err) {
       console.error('Failed to fetch user:', err);
@@ -46,7 +50,10 @@ function AccountPage() {
     try {
       setUploading(true);
       await api.patch('/profile/update/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json', // ✅ ensure JSON response
+        },
       });
       fetchUser(); // refresh after upload
       setSelectedFile(null);
