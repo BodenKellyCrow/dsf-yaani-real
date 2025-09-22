@@ -9,6 +9,7 @@ export default function CreateProjectPage() {
   const [targetAmount, setTargetAmount] = useState('');
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [uploaded, setUploaded] = useState(false);
 
   const navigate = useNavigate();
 
@@ -16,6 +17,27 @@ export default function CreateProjectPage() {
     const file = e.target.files[0];
     setImage(file);
     setPreview(URL.createObjectURL(file));
+    setUploaded(false);
+  };
+
+  const handleUploadImage = async () => {
+    if (!image) return alert('Please select an image first!');
+    try {
+      const formData = new FormData();
+      formData.append('image', image);
+
+      // temporary upload endpoint if you want separate image upload 
+      // otherwise just keep image for form submit
+      await api.post('/upload-temp/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setUploaded(true);
+      alert('Image uploaded successfully!');
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      alert('Failed to upload image.');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -120,6 +142,16 @@ export default function CreateProjectPage() {
               alt="Preview"
               className="w-full max-h-64 object-cover rounded-lg mt-3"
             />
+          )}
+
+          {image && (
+            <button
+              type="button"
+              onClick={handleUploadImage}
+              className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+            >
+              {uploaded ? 'Re-upload Image' : 'Upload Image'}
+            </button>
           )}
         </div>
 

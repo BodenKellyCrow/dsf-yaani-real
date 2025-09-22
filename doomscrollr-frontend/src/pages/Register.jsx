@@ -21,7 +21,7 @@ const Register = ({ onLogin }) => {
     }
 
     try {
-      // Create account
+      // ✅ Create account
       await api.post('auth/registration/', {
         email,
         username,
@@ -29,10 +29,21 @@ const Register = ({ onLogin }) => {
         password2,
       });
 
-      // Option A: Auto-login (use username for certainty)
-      await api.post('auth/login/', { username, password: password1 });
+      // ✅ Auto-login immediately
+      const loginRes = await api.post('auth/login/', {
+        username,
+        password: password1,
+      });
 
-      onLogin();
+      // ✅ Store tokens
+      const { access, refresh } = loginRes.data;
+      localStorage.setItem('accessToken', access);
+      localStorage.setItem('refreshToken', refresh);
+
+      // ✅ Trigger app-level login state
+      if (onLogin) onLogin();
+
+      // ✅ Redirect
       navigate('/explore');
     } catch (err) {
       const data = err?.response?.data;

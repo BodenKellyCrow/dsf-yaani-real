@@ -1,3 +1,4 @@
+// src/pages/AccountPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -7,8 +8,8 @@ function AccountPage() {
   const [user, setUser] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUser();
@@ -33,7 +34,7 @@ function AccountPage() {
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = e => {
     setSelectedFile(e.target.files[0]);
   };
 
@@ -45,11 +46,9 @@ function AccountPage() {
     try {
       setUploading(true);
       await api.patch('/profile/update/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      fetchUser(); // Refresh user info after upload
+      fetchUser(); // refresh after upload
       setSelectedFile(null);
     } catch (err) {
       console.error('Profile image upload failed:', err);
@@ -59,11 +58,14 @@ function AccountPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     navigate('/login');
   };
 
-  if (!user) return <p className="text-center p-6 font-sans">Loading...</p>;
+  if (!user) {
+    return <p className="text-center p-6 font-sans">Loading...</p>;
+  }
 
   return (
     <div className="p-6 max-w-3xl mx-auto bg-gray-50 min-h-screen font-sans">
@@ -117,10 +119,12 @@ function AccountPage() {
       <div className="mt-10">
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Funding History</h3>
         {transactions.length === 0 ? (
-          <p className="text-gray-500 text-sm">You haven’t funded any projects yet.</p>
+          <p className="text-gray-500 text-sm">
+            You haven’t funded any projects yet.
+          </p>
         ) : (
           <ul className="space-y-3">
-            {transactions.map((tx) => (
+            {transactions.map(tx => (
               <li
                 key={tx.id}
                 className="bg-white p-4 rounded-xl border shadow flex justify-between items-center"

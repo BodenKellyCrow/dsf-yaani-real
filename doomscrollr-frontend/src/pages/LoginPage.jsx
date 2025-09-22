@@ -1,29 +1,34 @@
+// src/pages/Login.jsx
 import { useState } from 'react';
 import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-const LoginPage = ({ onLogin }) => {
-  const [identifier, setIdentifier] = useState('');
+const Login = ({ onLogin }) => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setError('');
 
-    const payload =
-      identifier.includes('@')
-        ? { email: identifier, password }
-        : { username: identifier, password };
-
     try {
-      const response = await api.post('auth/login/', payload);
+      // ✅ Attempt login
+      const res = await api.post('auth/login/', {
+        username,
+        password,
+      });
 
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('refreshToken', response.data.refresh);
+      // ✅ Store tokens
+      const { access, refresh } = res.data;
+      localStorage.setItem('accessToken', access);
+      localStorage.setItem('refreshToken', refresh);
 
-      onLogin?.();
+      // ✅ Trigger app-level login state
+      if (onLogin) onLogin();
+
+      // ✅ Redirect
       navigate('/explore');
     } catch (err) {
       const data = err?.response?.data;
@@ -31,10 +36,10 @@ const LoginPage = ({ onLogin }) => {
         typeof data === 'string'
           ? data
           : data?.detail ||
-            Object.values(data || {})
-              .flat()
+            Object.entries(data || {})
+              .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(' ') : v}`)
               .join(' ') ||
-            'Invalid login. Please check your credentials.';
+            'Login failed. Please check your credentials.';
       setError(msg);
     }
   };
@@ -43,10 +48,10 @@ const LoginPage = ({ onLogin }) => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-red-200">
         <h1 className="text-3xl font-bold mb-2 text-center text-red-600">
-          Welcome to Doomscrollr 🚀
+          Welcome Back
         </h1>
         <p className="text-center text-gray-600 mb-6">
-          Log in to explore and support your favorite projects.
+          Log in to continue exploring Doomscrollr.
         </p>
 
         {error && (
@@ -58,10 +63,10 @@ const LoginPage = ({ onLogin }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            placeholder="Username or Email"
+            placeholder="Username"
             className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            value={username}
+            onChange={e => setUsername(e.target.value)}
             required
           />
           <input
@@ -69,7 +74,7 @@ const LoginPage = ({ onLogin }) => {
             placeholder="Password"
             className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             required
           />
           <button
@@ -83,7 +88,7 @@ const LoginPage = ({ onLogin }) => {
         <p className="mt-4 text-center text-sm text-gray-600">
           Don’t have an account?{' '}
           <Link to="/register" className="text-red-600 hover:underline font-medium">
-            Register here
+            Sign up here
           </Link>
         </p>
       </div>
@@ -91,4 +96,4 @@ const LoginPage = ({ onLogin }) => {
   );
 };
 
-export default LoginPage;
+export default Login;
