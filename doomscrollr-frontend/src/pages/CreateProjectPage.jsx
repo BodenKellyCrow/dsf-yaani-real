@@ -1,10 +1,9 @@
-// src/pages/CreateProjectPage.jsx
 import { useState } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateProjectPage() {
-  const [postType, setPostType] = useState('social'); 
+  const [postType, setPostType] = useState('social'); // 'social' or 'project'
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -15,58 +14,36 @@ export default function CreateProjectPage() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
-    }
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      alert('You must be logged in to post.');
-      navigate('/login');
-      return;
-    }
-
     const formData = new FormData();
-
     if (postType === 'project') {
       formData.append('title', title);
       formData.append('description', description);
       formData.append('target_amount', targetAmount);
     } else {
-      formData.append('content', description); 
+      formData.append('content', description);
     }
 
     if (image) formData.append('image', image);
 
     try {
       const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
-      const response = await api.post(endpoint, formData, {
+      await api.post(endpoint, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      console.log('Post submitted:', response.data);
-
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setTargetAmount('');
-      setImage(null);
-      setPreview(null);
-      setPostType('social');
-
       navigate('/feed');
     } catch (err) {
       if (err.response) {
-        console.error('Backend error:', err.response.data);
-        alert(typeof err.response.data === 'object' ? JSON.stringify(err.response.data) : err.response.data);
+        console.error('Error response:', err.response.data);
+        alert(JSON.stringify(err.response.data));
       } else {
         console.error('Error submitting post:', err.message);
-        alert(`Error submitting post: ${err.message}`);
       }
     }
   };
@@ -74,7 +51,7 @@ export default function CreateProjectPage() {
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow font-sans mt-10">
       <h2 className="text-2xl font-bold mb-6 text-gray-900">
-        Create a New {postType === 'project' ? 'Project' : 'Social Post'}
+        Create a New {postType === 'project' ? 'Project' : 'Post'}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">

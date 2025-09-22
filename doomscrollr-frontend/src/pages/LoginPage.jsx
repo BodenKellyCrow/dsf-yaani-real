@@ -1,4 +1,3 @@
-// src/pages/LoginPage.jsx
 import { useState } from 'react';
 import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
@@ -21,10 +20,12 @@ const LoginPage = ({ onLogin }) => {
     try {
       const response = await api.post('auth/login/', payload);
 
-      console.log('Login response:', response.data); // debug
-
+      // Store tokens
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
+
+      console.log('Access token stored:', response.data.access);
+      console.log('Refresh token stored:', response.data.refresh);
 
       onLogin?.();
       navigate('/explore');

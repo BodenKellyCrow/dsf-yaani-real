@@ -4,13 +4,14 @@ const api = axios.create({
   baseURL: 'https://doomscrollr.onrender.com/api/',
 });
 
+let isRefreshing = false;
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  console.log('Sending request with token:', token); // debug
   return config;
 });
-
-let isRefreshing = false;
 
 api.interceptors.response.use(
   (response) => response,
@@ -18,13 +19,14 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) return Promise.reject(error); // prevent loops
+      if (isRefreshing) return Promise.reject(error);
       isRefreshing = true;
       originalRequest._retry = true;
 
       const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         window.location.href = '/login';
         return Promise.reject(error);
       }
