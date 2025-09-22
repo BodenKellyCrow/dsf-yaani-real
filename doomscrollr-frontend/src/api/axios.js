@@ -1,23 +1,17 @@
-// src/api/axios.js
 import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://doomscrollr.onrender.com/api/",
-  withCredentials: true,
+  withCredentials: true,  // ✅ keep for cookies
 });
 
-// 🔑 Attach token automatically on every request
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Token ${token}`; 
-      // 👆 If your backend expects "Bearer <token>", change to:
-      // config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// ✅ attach Authorization header if token exists
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token"); // or sessionStorage
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export default api;

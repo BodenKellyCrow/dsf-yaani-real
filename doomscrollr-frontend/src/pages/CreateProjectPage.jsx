@@ -19,33 +19,38 @@ export default function UnifiedPostForm() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
+  e.preventDefault();
+  const formData = new FormData();
 
-    if (postType === 'project') {
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('target_amount', targetAmount);
-    } else {
-      formData.append('content', description); // re-use description as content
-    }
+  if (postType === 'project') {
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('target_amount', targetAmount);
+  } else {
+    formData.append('content', description); // re-use description as content
+  }
 
-    if (image) {
-      formData.append('image', image);
-    }
+  if (image) {
+    formData.append('image', image);
+  }
 
-    try {
-      const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
-      await axios.post(endpoint, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      navigate('/feed');
-    } catch (err) {
-      console.error('Error submitting post:', err);
-    }
-  };
+  try {
+    const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
+
+    // ✅ cleaned up axios call
+    await axios.post(endpoint, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    navigate('/feed');
+  } catch (err) {
+    console.error(
+      "Error submitting post:",
+      err.response?.data || err.message
+    );
+  }
+};
+
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow font-sans mt-10">
