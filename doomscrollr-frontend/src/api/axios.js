@@ -1,13 +1,13 @@
+// src/api/axios.js
 import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://doomscrollr.onrender.com/api/",
-  withCredentials: true,  // ✅ keep for cookies
 });
 
-// ✅ attach Authorization header if token exists
+// Attach JWT access token to every request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // or sessionStorage
+  const token = localStorage.getItem("accessToken"); // must match login storage
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

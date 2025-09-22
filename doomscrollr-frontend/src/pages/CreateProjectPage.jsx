@@ -1,6 +1,6 @@
 // src/pages/CreateProjectPage.jsx
 import { useState } from 'react';
-import api from '../api/axios'; // axios instance with JWT auto-refresh
+import api from '../api/axios'; // corrected axios instance with JWT
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateProjectPage() {
@@ -15,8 +15,10 @@ export default function CreateProjectPage() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setImage(file);
-    setPreview(URL.createObjectURL(file));
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -36,10 +38,12 @@ export default function CreateProjectPage() {
       formData.append('description', description);
       formData.append('target_amount', targetAmount);
     } else {
-      formData.append('content', description); // social post
+      formData.append('content', description); // social post content
     }
 
-    if (image) formData.append('image', image);
+    if (image) {
+      formData.append('image', image);
+    }
 
     try {
       const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
@@ -55,9 +59,9 @@ export default function CreateProjectPage() {
       setTargetAmount('');
       setImage(null);
       setPreview(null);
-      setPostType('social'); // reset type
+      setPostType('social');
 
-      navigate('/feed'); // redirect after success
+      navigate('/feed');
     } catch (err) {
       if (err.response) {
         console.error('Backend error response:', err.response.data);
@@ -93,7 +97,7 @@ export default function CreateProjectPage() {
           </select>
         </div>
 
-        {/* Project-specific fields */}
+        {/* Project Fields */}
         {postType === 'project' && (
           <>
             <div>
@@ -119,7 +123,7 @@ export default function CreateProjectPage() {
           </>
         )}
 
-        {/* Description / Content Field */}
+        {/* Description / Content */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {postType === 'project' ? 'Project Description' : 'Post Content'}
@@ -136,7 +140,9 @@ export default function CreateProjectPage() {
 
         {/* Image Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image (optional)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Upload Image (optional)
+          </label>
           <input
             type="file"
             accept="image/*"
