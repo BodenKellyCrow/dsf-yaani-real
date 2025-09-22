@@ -20,8 +20,8 @@ export default function CreateProjectPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const formData = new FormData();
+
     if (postType === 'project') {
       formData.append('title', title);
       formData.append('description', description);
@@ -108,8 +108,19 @@ export default function CreateProjectPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image (optional)</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} className="block text-sm" />
-          {preview && <img src={preview} alt="Preview" className="w-full max-h-64 object-cover rounded-lg mt-3" />}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="block text-sm"
+          />
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-full max-h-64 object-cover rounded-lg mt-3"
+            />
+          )}
         </div>
 
         <div>

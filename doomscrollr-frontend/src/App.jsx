@@ -18,6 +18,13 @@ function App() {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      setLoggedIn(false);
+      setCheckingAuth(false);
+      return;
+    }
+
     api.get('auth/user/')
       .then(() => setLoggedIn(true))
       .catch(() => setLoggedIn(false))
@@ -29,14 +36,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Redirect root */}
         <Route path="/" element={<Navigate to={loggedIn ? "/home" : "/login"} />} />
-
-        {/* Auth routes */}
         <Route path="/login" element={<Login onLogin={() => setLoggedIn(true)} />} />
         <Route path="/register" element={<Register onLogin={() => setLoggedIn(true)} />} />
 
-        {/* Protected routes inside Layout */}
         {loggedIn && (
           <Route element={<Layout />}>
             <Route path="/home" element={<HomePage />} />
@@ -49,7 +52,6 @@ function App() {
           </Route>
         )}
 
-        {/* Catch-all */}
         <Route path="*" element={<div className="p-6 text-center">404 - Page Not Found</div>} />
       </Routes>
     </Router>
@@ -57,4 +59,3 @@ function App() {
 }
 
 export default App;
-

@@ -20,7 +20,6 @@ const LoginPage = ({ onLogin }) => {
     try {
       const response = await api.post('auth/login/', payload);
 
-      // Store tokens
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
 

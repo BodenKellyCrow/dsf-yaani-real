@@ -9,7 +9,6 @@ let isRefreshing = false;
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  console.log('Sending request with token:', token); // debug
   return config;
 });
 
@@ -18,6 +17,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Only retry once
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) return Promise.reject(error);
       isRefreshing = true;
@@ -27,7 +27,7 @@ api.interceptors.response.use(
       if (!refreshToken) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        isRefreshing = false;
         return Promise.reject(error);
       }
 
@@ -46,7 +46,6 @@ api.interceptors.response.use(
         isRefreshing = false;
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
         return Promise.reject(err);
       }
     }
