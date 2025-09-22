@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
 import Explore from './pages/ExplorePage';
 import Login from './pages/LoginPage';
 import Register from './pages/Register';
@@ -18,17 +17,25 @@ function App() {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      setLoggedIn(false);
-      setCheckingAuth(false);
-      return;
-    }
+    const checkAuth = async () => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        setLoggedIn(false);
+        setCheckingAuth(false);
+        return;
+      }
 
-    api.get('auth/user/')
-      .then(() => setLoggedIn(true))
-      .catch(() => setLoggedIn(false))
-      .finally(() => setCheckingAuth(false));
+      try {
+        await api.get('auth/user/');
+        setLoggedIn(true);
+      } catch (err) {
+        setLoggedIn(false);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   if (checkingAuth) return <div className="p-6 text-center">Checking login status...</div>;

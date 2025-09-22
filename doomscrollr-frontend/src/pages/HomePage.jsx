@@ -1,3 +1,4 @@
+// src/pages/HomePage.jsx
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { MEDIA_URL } from '../api/config';
@@ -14,7 +15,9 @@ const HomePage = () => {
   }, []);
 
   const fetchFeed = async () => {
+    setLoading(true);
     try {
+      // ✅ fetch combined feed: social posts + projects
       const res = await api.get('/feed/');
       setPosts(res.data);
     } catch (err) {
@@ -26,9 +29,7 @@ const HomePage = () => {
 
   const handleLike = async (postId) => {
     try {
-      await api.post(`/feed/${postId}/like/`, {}, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-      });
+      await api.post(`/feed/${postId}/like/`);
       setPosts(posts.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p));
     } catch (err) {
       console.error('Like failed:', err);
@@ -40,11 +41,9 @@ const HomePage = () => {
     if (!text) return;
 
     try {
-      await api.post(`/feed/${postId}/comment/`, { text }, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-      });
+      await api.post(`/feed/${postId}/comment/`, { text });
       setCommentText(prev => ({ ...prev, [postId]: '' }));
-      fetchFeed(); // Refresh after new comment
+      fetchFeed(); // refresh after comment
     } catch (err) {
       console.error('Comment failed:', err);
     }
@@ -53,8 +52,8 @@ const HomePage = () => {
   const handleShare = async (post) => {
     try {
       await navigator.share({
-        title: post.title,
-        text: post.description || '',
+        title: post.title || post.content || 'Doomscrollr Post',
+        text: post.description || post.content || '',
         url: `${window.location.origin}/posts/${post.id}`,
       });
     } catch (err) {
@@ -79,10 +78,9 @@ const HomePage = () => {
           </div>
 
           {/* Post Body */}
-          <h3 className="text-lg font-bold mb-1">{post.title}</h3>
-          {post.description && (
-            <p className="text-gray-700 mb-3">{post.description}</p>
-          )}
+          {post.title && <h3 className="text-lg font-bold mb-1">{post.title}</h3>}
+          {post.description && <p className="text-gray-700 mb-3">{post.description}</p>}
+          {post.content && <p className="text-gray-700 mb-3">{post.content}</p>}
           {post.image && (
             <img
               src={`${MEDIA_URL}${post.image}`}
@@ -93,9 +91,15 @@ const HomePage = () => {
 
           {/* Buttons */}
           <div className="flex space-x-6 text-sm text-gray-600 mb-3">
-            <button onClick={() => handleLike(post.id)} className="hover:text-red-500">❤️ {post.likes}</button>
-            <button onClick={() => document.getElementById(`comment-${post.id}`).focus()} className="hover:text-blue-600">💬 {post.comments?.length || 0}</button>
-            <button onClick={() => handleShare(post)} className="hover:text-green-600">🔗 Share</button>
+            <button onClick={() => handleLike(post.id)} className="hover:text-red-500">
+              ❤️ {post.likes || 0}
+            </button>
+            <button onClick={() => document.getElementById(`comment-${post.id}`).focus()} className="hover:text-blue-600">
+              💬 {post.comments?.length || 0}
+            </button>
+            <button onClick={() => handleShare(post)} className="hover:text-green-600">
+              🔗 Share
+            </button>
           </div>
 
           {/* Comments */}
@@ -131,4 +135,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-

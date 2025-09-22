@@ -23,9 +23,6 @@ const LoginPage = ({ onLogin }) => {
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
 
-      console.log('Access token stored:', response.data.access);
-      console.log('Refresh token stored:', response.data.refresh);
-
       onLogin?.();
       navigate('/explore');
     } catch (err) {
