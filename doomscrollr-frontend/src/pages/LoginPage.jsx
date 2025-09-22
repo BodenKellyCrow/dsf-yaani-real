@@ -4,7 +4,7 @@ import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
 
 const LoginPage = ({ onLogin }) => {
-  const [identifier, setIdentifier] = useState(''); // username OR email
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -21,11 +21,12 @@ const LoginPage = ({ onLogin }) => {
     try {
       const response = await api.post('auth/login/', payload);
 
-      // ✅ Save access & refresh tokens
+      console.log('Login response:', response.data); // debug
+
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
 
-      onLogin(); // optional callback
+      onLogin?.();
       navigate('/explore');
     } catch (err) {
       const data = err?.response?.data;

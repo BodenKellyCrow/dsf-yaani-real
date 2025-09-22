@@ -4,7 +4,7 @@ import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateProjectPage() {
-  const [postType, setPostType] = useState('social'); // 'social' or 'project'
+  const [postType, setPostType] = useState('social'); 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -38,12 +38,10 @@ export default function CreateProjectPage() {
       formData.append('description', description);
       formData.append('target_amount', targetAmount);
     } else {
-      formData.append('content', description); // social post
+      formData.append('content', description); 
     }
 
-    if (image) {
-      formData.append('image', image);
-    }
+    if (image) formData.append('image', image);
 
     try {
       const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
@@ -51,7 +49,7 @@ export default function CreateProjectPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      console.log('Post submitted successfully:', response.data);
+      console.log('Post submitted:', response.data);
 
       // Reset form
       setTitle('');
@@ -64,12 +62,8 @@ export default function CreateProjectPage() {
       navigate('/feed');
     } catch (err) {
       if (err.response) {
-        console.error('Backend error response:', err.response.data);
-        alert(
-          typeof err.response.data === 'object'
-            ? JSON.stringify(err.response.data)
-            : err.response.data
-        );
+        console.error('Backend error:', err.response.data);
+        alert(typeof err.response.data === 'object' ? JSON.stringify(err.response.data) : err.response.data);
       } else {
         console.error('Error submitting post:', err.message);
         alert(`Error submitting post: ${err.message}`);
@@ -84,7 +78,6 @@ export default function CreateProjectPage() {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Post Type Selector */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Post Type</label>
           <select
@@ -97,7 +90,6 @@ export default function CreateProjectPage() {
           </select>
         </div>
 
-        {/* Project Fields */}
         {postType === 'project' && (
           <>
             <div>
@@ -123,7 +115,6 @@ export default function CreateProjectPage() {
           </>
         )}
 
-        {/* Description / Content */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {postType === 'project' ? 'Project Description' : 'Post Content'}
@@ -138,27 +129,12 @@ export default function CreateProjectPage() {
           />
         </div>
 
-        {/* Image Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Upload Image (optional)
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="block text-sm"
-          />
-          {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-full max-h-64 object-cover rounded-lg mt-3"
-            />
-          )}
+          <label className="block text-sm font-medium text-gray-700 mb-1">Upload Image (optional)</label>
+          <input type="file" accept="image/*" onChange={handleImageChange} className="block text-sm" />
+          {preview && <img src={preview} alt="Preview" className="w-full max-h-64 object-cover rounded-lg mt-3" />}
         </div>
 
-        {/* Submit Button */}
         <div>
           <button
             type="submit"
