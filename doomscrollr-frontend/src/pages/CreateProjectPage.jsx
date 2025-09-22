@@ -1,9 +1,9 @@
+// src/pages/CreateProjectPage.jsx
 import { useState } from 'react';
-import axios from '../api/axios';
+import api from '../api/axios'; // axios instance with JWT auto-refresh
 import { useNavigate } from 'react-router-dom';
 
-export default function UnifiedPostForm() {
-  const [postType, setPostType] = useState('social'); // 'social' or 'project'
+export default function CreateProjectPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -20,47 +20,35 @@ export default function UnifiedPostForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      alert('You must be logged in to post.');
+      navigate('/login');
+      return;
+    }
+
     const formData = new FormData();
-
-    if (postType === 'project') {
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('target_amount', targetAmount);
-    } else {
-      formData.append('content', description);
-    }
-
-    if (image) {
-      formData.append('image', image);
-    }
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('target_amount', targetAmount);
+    if (image) formData.append('image', image);
 
     try {
-      const endpoint = postType === 'project' ? '/projects/' : '/social-posts/';
-
-      // ✅ Get JWT token from localStorage (or wherever you store it)
-      const token = localStorage.getItem('accessToken'); // adjust key if different
-      if (!token) {
-        alert('You must be logged in to post.');
-        return;
-      }
-
-      const response = await axios.post(endpoint, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`, // attach JWT
-        },
+      const response = await api.post('/projects/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      console.log('Post submitted successfully:', response.data);
+      console.log('Project created successfully:', response.data);
 
-      // reset form
+      // Reset form
       setTitle('');
       setDescription('');
       setTargetAmount('');
       setImage(null);
       setPreview(null);
 
-      navigate('/feed'); // navigate after success
+      navigate('/feed'); // redirect after success
     } catch (err) {
       if (err.response) {
         console.error('Backend error response:', err.response.data);
@@ -70,63 +58,44 @@ export default function UnifiedPostForm() {
             : err.response.data
         );
       } else {
-        console.error('Error submitting post:', err.message);
-        alert(`Error submitting post: ${err.message}`);
+        console.error('Error submitting project:', err.message);
+        alert(`Error submitting project: ${err.message}`);
       }
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow font-sans mt-10">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">
-        Create a New {postType === 'project' ? 'Project' : 'Post'}
-      </h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">Create a New Project</h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Post Type Selector */}
+        {/* Project Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Post Type</label>
-          <select
-            value={postType}
-            onChange={(e) => setPostType(e.target.value)}
+          <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full border px-3 py-2 rounded text-sm"
-          >
-            <option value="social">Social Post</option>
-            <option value="project">Project Post</option>
-          </select>
+            required
+          />
         </div>
 
-        {/* Conditional Fields for Project */}
-        {postType === 'project' && (
-          <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full border px-3 py-2 rounded text-sm"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Target Amount</label>
-              <input
-                type="number"
-                value={targetAmount}
-                onChange={(e) => setTargetAmount(e.target.value)}
-                className="w-full border px-3 py-2 rounded text-sm"
-                required
-              />
-            </div>
-          </>
-        )}
-
-        {/* Description Field */}
+        {/* Target Amount */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {postType === 'project' ? 'Project Description' : 'Post Content'}
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Target Amount</label>
+          <input
+            type="number"
+            value={targetAmount}
+            onChange={(e) => setTargetAmount(e.target.value)}
+            className="w-full border px-3 py-2 rounded text-sm"
+            required
+          />
+        </div>
+
+        {/* Project Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Project Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -161,7 +130,7 @@ export default function UnifiedPostForm() {
             type="submit"
             className="w-full bg-blue-600 text-white font-medium py-2 rounded hover:bg-blue-700 transition duration-200"
           >
-            {postType === 'project' ? 'Create Project' : 'Post'}
+            Create Project
           </button>
         </div>
       </form>

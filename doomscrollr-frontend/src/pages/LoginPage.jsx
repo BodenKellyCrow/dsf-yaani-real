@@ -20,8 +20,13 @@ const LoginPage = ({ onLogin }) => {
         : { username: identifier, password };
 
     try {
-      await api.post('auth/login/', payload);
-      onLogin();
+      const response = await api.post('auth/login/', payload);
+
+      // ✅ Save JWT tokens for future requests
+      localStorage.setItem('accessToken', response.data.access);
+      localStorage.setItem('refreshToken', response.data.refresh);
+
+      onLogin(); // optional callback for parent component
       navigate('/explore');
     } catch (err) {
       const data = err?.response?.data;
