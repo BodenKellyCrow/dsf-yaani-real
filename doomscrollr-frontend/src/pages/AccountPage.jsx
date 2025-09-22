@@ -17,11 +17,7 @@ function AccountPage() {
 
   const fetchFundingHistory = async () => {
     try {
-      const res = await api.get('/user-transactions/', {
-        headers: {
-          Authorization: `Token ${localStorage.getItem('token')}`,
-        },
-      });
+      const res = await api.get('/user-transactions/');
       setTransactions(res.data);
     } catch (err) {
       console.error('Failed to fetch funding history:', err);
@@ -30,11 +26,7 @@ function AccountPage() {
 
   const fetchUser = async () => {
     try {
-      const res = await api.get('/auth/user/', {
-        headers: {
-          Authorization: `Token ${localStorage.getItem('token')}`,
-        },
-      });
+      const res = await api.get('/auth/user/');
       setUser(res.data);
     } catch (err) {
       console.error('Failed to fetch user:', err);
@@ -55,7 +47,6 @@ function AccountPage() {
       await api.patch('/profile/update/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Token ${localStorage.getItem('token')}`,
         },
       });
       fetchUser(); // Refresh user info after upload
