@@ -9,11 +9,10 @@ const LoginPage = ({ onLogin }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Send the correct key based on what the user typed
     const payload =
       identifier.includes('@')
         ? { email: identifier, password }
@@ -22,11 +21,11 @@ const LoginPage = ({ onLogin }) => {
     try {
       const response = await api.post('auth/login/', payload);
 
-      // ✅ Save JWT tokens for future requests
+      // ✅ Save access & refresh tokens
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
 
-      onLogin(); // optional callback for parent component
+      onLogin(); // optional callback
       navigate('/explore');
     } catch (err) {
       const data = err?.response?.data;
@@ -45,7 +44,6 @@ const LoginPage = ({ onLogin }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-red-200">
-        {/* 🔴 Header */}
         <h1 className="text-3xl font-bold mb-2 text-center text-red-600">
           Welcome to Doomscrollr 🚀
         </h1>
@@ -59,14 +57,13 @@ const LoginPage = ({ onLogin }) => {
           </div>
         )}
 
-        {/* 🔐 Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             placeholder="Username or Email"
             className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             value={identifier}
-            onChange={e => setIdentifier(e.target.value)}
+            onChange={(e) => setIdentifier(e.target.value)}
             required
           />
           <input
@@ -74,7 +71,7 @@ const LoginPage = ({ onLogin }) => {
             placeholder="Password"
             className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
           <button

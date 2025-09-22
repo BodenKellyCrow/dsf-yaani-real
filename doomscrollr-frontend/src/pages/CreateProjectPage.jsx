@@ -1,6 +1,6 @@
 // src/pages/CreateProjectPage.jsx
 import { useState } from 'react';
-import api from '../api/axios'; // corrected axios instance with JWT
+import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateProjectPage() {
@@ -38,7 +38,7 @@ export default function CreateProjectPage() {
       formData.append('description', description);
       formData.append('target_amount', targetAmount);
     } else {
-      formData.append('content', description); // social post content
+      formData.append('content', description); // social post
     }
 
     if (image) {
