@@ -20,6 +20,7 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// ✅ Attach token before every request
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('accessToken');
   if (token) {
@@ -28,6 +29,7 @@ api.interceptors.request.use(config => {
   return config;
 });
 
+// ✅ Handle expired tokens
 api.interceptors.response.use(
   response => response,
   async error => {
@@ -60,7 +62,7 @@ api.interceptors.response.use(
         const res = await axios.post(
           'https://doomscrollr.onrender.com/api/token/refresh/',
           { refresh: refreshToken },
-          { headers: { Accept: 'application/json' } } // ✅ Always ask for JSON
+          { headers: { Accept: 'application/json' } }
         );
 
         localStorage.setItem('accessToken', res.data.access);
