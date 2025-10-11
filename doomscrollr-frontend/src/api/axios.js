@@ -1,3 +1,4 @@
+// src/api/axios.js
 import axios from 'axios';
 
 const api = axios.create({
@@ -20,7 +21,7 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// ✅ Attach token before every request
+// Attach token before every request
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('accessToken');
   if (token) {
@@ -29,7 +30,7 @@ api.interceptors.request.use(config => {
   return config;
 });
 
-// ✅ Handle expired tokens
+// Handle expired tokens
 api.interceptors.response.use(
   response => response,
   async error => {
