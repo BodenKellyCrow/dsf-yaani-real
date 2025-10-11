@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'https://doomscrollr.onrender.com/api/',
+  withCredentials: true, 
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
