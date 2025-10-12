@@ -6,7 +6,7 @@ import Register from './pages/Register';
 import HomePage from './pages/HomePage';
 // NOTE: Renamed to AccountSettings or similar for clarity, 
 // but keeping 'Profile' for now as per your original file.
-import AccountPage from './pages/AccountPage'; 
+import AccountPage from './pages/UserProfilePage'; 
 import UserProfilePage from './pages/UserProfilePage'; // 👈 NEW: Dedicated component for read-only profiles
 import ChatList from './pages/ChatList';
 import ChatRoom from './pages/ChatRoom';
