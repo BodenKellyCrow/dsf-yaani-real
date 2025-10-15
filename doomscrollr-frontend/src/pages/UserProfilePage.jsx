@@ -1,11 +1,11 @@
 // src/pages/UserProfilePage.jsx
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { MEDIA_URL } from '../api/config';
 
 // -----------------------------------------------------------
-// ⭐️ NEW COMPONENT: ProfileSkeleton (Place the code from above here)
+// ⭐️ COMPONENT: ProfileSkeleton
 const ProfileSkeleton = () => (
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen animate-pulse">
         {/* Profile Header Skeleton */}
@@ -53,7 +53,7 @@ const ProfileSkeleton = () => (
 );
 
 // -----------------------------------------------------------
-// ⭐️ NEW COMPONENT: DataListFallback (Place the code from above here)
+// ⭐️ COMPONENT: DataListFallback
 const DataListFallback = ({ type, hasError, onRetry }) => {
     let message = '';
     let icon = '';
@@ -92,7 +92,7 @@ export default function UserProfilePage() {
 
     // Core Data States
     const [user, setUser] = useState(null);
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = setPosts([]);
     const [projects, setProjects] = useState([]);
 
     // Loading/Error States (Granular Tracking)
@@ -129,7 +129,7 @@ export default function UserProfilePage() {
     }, [userId]);
 
     const fetchPosts = useCallback(async (retry = false) => {
-        if (!retry) setPostsError(null); // Clear error unless it's a dedicated retry
+        if (!retry) setPostsError(null);
         try {
             const postsRes = await api.get(`/social-posts/?author=${userId}`);
             setPosts(postsRes.data);
@@ -142,7 +142,7 @@ export default function UserProfilePage() {
     }, [userId]);
 
     const fetchProjects = useCallback(async (retry = false) => {
-        if (!retry) setProjectsError(null); // Clear error unless it's a dedicated retry
+        if (!retry) setProjectsError(null);
         try {
             const projectsRes = await api.get(`/projects/?owner=${userId}`);
             setProjects(projectsRes.data);
@@ -172,8 +172,24 @@ export default function UserProfilePage() {
 
 
     useEffect(() => {
+        // ⭐️ FIX: GUARD CLAUSE & CORRECT DEPENDENCY ARRAY ⭐️
+        
+        // 1. Guard against 'undefined' or non-numeric IDs from the URL
+        // This stops the problematic GET /api/users/undefined/ 404 call
+        if (!userId || isNaN(parseInt(userId))) {
+            setLoading(false);
+            // Manually set a 404-like error state to display the proper error message
+            setUserError({ response: { status: 404 } });
+            console.error("Invalid or undefined userId detected in URL. Stopping API request.");
+            return; 
+        }
+        
+        // 2. If userId is valid, fetch the data
         fetchAllData();
-    }, [fetchAllData]);
+
+    // 3. Dependency Array: Re-run when userId changes (e.g., navigating from /users/1 to /users/2)
+    // fetchAllData is used to satisfy exhaustive-deps, and userId is the external trigger.
+    }, [userId, fetchAllData]);
 
 
     // =================================================================
@@ -186,6 +202,7 @@ export default function UserProfilePage() {
         const endpoint = `/users/${userId}/${isFollowing ? 'unfollow' : 'follow'}/`;
         
         // Optimistic UI Update
+        const previousFollowingState = isFollowing;
         setIsFollowing(prev => !prev); 
 
         try {
@@ -194,9 +211,9 @@ export default function UserProfilePage() {
             // If success, keep the optimistic update
         } catch (err) {
             // Revert on failure
-            setIsFollowing(prev => !prev); 
+            setIsFollowing(previousFollowingState); 
             console.error(`❌ Failed to toggle follow state:`, err);
-            alert(`Failed to ${isFollowing ? 'unfollow' : 'follow'} user. Please try again.`);
+            alert(`Failed to ${previousFollowingState ? 'unfollow' : 'follow'} user. Please try again.`);
         } finally {
             setFollowLoading(false);
         }
@@ -216,7 +233,7 @@ export default function UserProfilePage() {
         return <ProfileSkeleton />;
     }
 
-    // 2. User Not Found/Critical Error (e.g., 404 on user endpoint)
+    // 2. User Not Found/Critical Error (Handles 404 from server or guard clause)
     if (userError || !user) {
         return (
             <div className="max-w-md mx-auto p-10 bg-white shadow-xl rounded-lg mt-20 text-center">
