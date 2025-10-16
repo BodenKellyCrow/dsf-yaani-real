@@ -9,40 +9,33 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setError('');
+// In your Login.jsx, after successful login:
 
-    try {
-      const res = await api.post(
-        '/auth/login/',
-        { username, password },
-        {
-          headers: {
-            Accept: 'application/json', // ✅ Force JSON
-          },
-        }
-      );
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  // ... validation code
 
-      const { access, refresh } = res.data;
-      localStorage.setItem('accessToken', access);
-      localStorage.setItem('refreshToken', refresh);
-
-      if (onLogin) onLogin();
-      navigate('/explore');
-    } catch (err) {
-      const data = err?.response?.data;
-      const msg =
-        typeof data === 'string'
-          ? data
-          : data?.detail ||
-            Object.entries(data || {})
-              .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(' ') : v}`)
-              .join(' ') ||
-            'Login failed. Please check your credentials.';
-      setError(msg);
+  try {
+    const res = await api.post('/auth/login/', { username, password });
+    
+    const { access, refresh, user } = res.data;
+    
+    // ✅ Store tokens
+    localStorage.setItem('accessToken', access);
+    localStorage.setItem('refreshToken', refresh);
+    
+    // ✅ Store user data for chat
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('userId', user.id);
+      localStorage.setItem('username', user.username);
     }
-  };
+    
+    navigate('/explore');
+  } catch (err) {
+    // ... error handling
+  }
+};
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6">
