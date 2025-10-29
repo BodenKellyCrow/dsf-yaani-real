@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { MEDIA_URL } from "../api/config";
+// ✅ CHANGE: Import the new getImageUrl helper
+import { getImageUrl } from "../api/config"; 
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -32,12 +33,15 @@ const Profile = () => {
   const fetchProfileData = async () => {
     setLoading(true);
     try {
-      const profileRes = await api.get("/auth/user/");
+      // ✅ Profile Editing Logic: Calls the /auth/user/ endpoint
+      const profileRes = await api.get("/auth/user/"); 
       const userData = profileRes.data;
 
       setProfile(userData);
       setUsername(userData.username || "");
       setBio(userData.bio || "");
+      
+      // We don't set imagePreview here, it's only for newly selected local file
 
       // Fetch user’s content
       const [projectsRes, postsRes] = await Promise.all([
@@ -70,10 +74,13 @@ const Profile = () => {
 
     try {
       const formData = new FormData();
+      // Ensure we only send fields if they are different, but we send them all for simplicity
       formData.append("username", username);
       formData.append("bio", bio);
-      if (image) formData.append("profile_image", image);
+      // Only append image if a new one was selected
+      if (image) formData.append("profile_image", image); 
 
+      // Calls projects/views.py -> UserDetailView -> patch method
       const res = await api.patch("/auth/user/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -109,7 +116,8 @@ const Profile = () => {
     }
 
     try {
-      await api.put("/users/change-password/", {
+      // Calls projects/views.py -> ChangePasswordView -> put method
+      await api.put("/users/change-password/", { 
         old_password: currentPassword,
         new_password: newPassword,
       });
@@ -186,9 +194,8 @@ const Profile = () => {
             <img
               src={
                 imagePreview ||
-                (profile.profile_image
-                  ? `${MEDIA_URL}${profile.profile_image}`
-                  : "/default-profile.png")
+                // ✅ CHANGE: Use getImageUrl helper for profile image
+                getImageUrl(profile.profile_image)
               }
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-blue-500"
@@ -341,7 +348,8 @@ const Profile = () => {
               >
                 {project.image && (
                   <img
-                    src={`${MEDIA_URL}${project.image}`}
+                    // ✅ CHANGE: Use getImageUrl helper for project image
+                    src={getImageUrl(project.image)}
                     alt={project.title}
                     className="w-full h-40 object-cover rounded-lg mb-3"
                   />
@@ -376,7 +384,8 @@ const Profile = () => {
                 <p className="text-gray-800 mb-2">{post.content}</p>
                 {post.image && (
                   <img
-                    src={`${MEDIA_URL}${post.image}`}
+                    // ✅ CHANGE: Use getImageUrl helper for post image
+                    src={getImageUrl(post.image)}
                     alt="Post"
                     className="w-full max-h-96 object-cover rounded-lg"
                   />
