@@ -50,26 +50,35 @@ const ChatRoom = () => {
     }
   };
 
-  const sendMessage = async (e) => {
-    e?.preventDefault();
-    if (!text.trim() || sending) return;
+const sendMessage = async (e) => {
+  e?.preventDefault();
+  if (!text.trim() || sending) return;
 
-    setSending(true);
-    try {
-      // ✅ FIX 3: Changed endpoint and removed Authorization header
-      const res = await api.post(`/conversations/${id}/messages/`, { text });
-      
-      // Add new message to the list
-      setMessages((prev) => [...prev, res.data]);
-      setText('');
-      console.log('✅ Message sent:', res.data);
-    } catch (err) {
-      console.error('❌ Failed to send message:', err);
-      alert('Failed to send message. Please try again.');
-    } finally {
-      setSending(false);
-    }
-  };
+  setSending(true);
+  try {
+    // ✅ Make sure the payload structure matches backend expectations
+    const payload = {
+      text: text.trim(),
+      // Remove these if not needed:
+      // conversation: parseInt(id),
+      // sender: currentUserId,
+    };
+
+    console.log('📤 Sending message:', payload); // Debug log
+
+    const res = await api.post(`/conversations/${id}/messages/`, payload);
+    
+    setMessages((prev) => [...prev, res.data]);
+    setText('');
+    console.log('✅ Message sent:', res.data);
+  } catch (err) {
+    console.error('❌ Failed to send message:', err);
+    console.error('Response data:', err.response?.data); // ✅ See actual error
+    alert(`Failed to send message: ${err.response?.data?.text?.[0] || 'Unknown error'}`);
+  } finally {
+    setSending(false);
+  }
+};
 
   // ✅ FIX 4: Get username from localStorage
   const currentUsername = localStorage.getItem('username') || 
